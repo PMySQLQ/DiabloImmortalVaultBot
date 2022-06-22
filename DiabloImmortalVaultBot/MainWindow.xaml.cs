@@ -1,17 +1,8 @@
-﻿using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-
-namespace DiabloImmortalVaultBot;
+﻿namespace DiabloImmortalVaultBot;
 
 public partial class MainWindow
 {
-    private const int XPos = 1800; //enter button
-    //private const int XPos = 1350; //find party button
-    private const int YPos = 856;
+    private readonly AppSettings _appSettings;
 
     #region user32.dll
     private const UInt32 MOUSEEVENTF_LEFTDOWN = 0x0002;
@@ -28,33 +19,27 @@ public partial class MainWindow
     #endregion
 
 
-    public MainWindow()
+    public MainWindow(IOptions<AppSettings> settings)
     {
         InitializeComponent();
+        _appSettings = settings.Value;
     }
 
     private void BtnStartClick(object sender, RoutedEventArgs e)
     {
-        SetCursorPos(XPos, YPos);
-        Thread.Sleep(50);
         Task.Run(ClickBot);
     }
 
-    private static Color GetPixelColor()
+    private void ClickBot()
     {
-        var bitmap = new Bitmap((int)SystemParameters.VirtualScreenWidth, (int)SystemParameters.VirtualScreenHeight);
-        var graphics = Graphics.FromImage(bitmap);
-        graphics.CopyFromScreen(0, 0, 0, 0, bitmap.Size);
-        var currentPixelColor = bitmap.GetPixel(XPos, YPos);
-        return currentPixelColor;
-    }
-
-    private static void ClickBot()
-    {
+        SetCursorPos(_appSettings.XPos, _appSettings.YPos);
         while (true)
         {
             try
             {
+                if(_appSettings.ForcerCursorPosition)
+                    SetCursorPos(_appSettings.XPos, _appSettings.YPos);
+
                 var pixelColor = GetPixelColor();
                 var diff = pixelColor.R - pixelColor.G - pixelColor.B;
 
@@ -70,6 +55,15 @@ public partial class MainWindow
             }
             Thread.Sleep(50);
         }
+    }
+
+    private Color GetPixelColor()
+    {
+        var bitmap = new Bitmap((int)SystemParameters.VirtualScreenWidth, (int)SystemParameters.VirtualScreenHeight);
+        var graphics = Graphics.FromImage(bitmap);
+        graphics.CopyFromScreen(0, 0, 0, 0, bitmap.Size);
+        var currentPixelColor = bitmap.GetPixel(_appSettings.XPos, _appSettings.YPos);
+        return currentPixelColor;
     }
 
     private static void Click()

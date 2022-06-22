@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace DiabloImmortalVaultBot;
+﻿namespace DiabloImmortalVaultBot.Model;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct POINT
