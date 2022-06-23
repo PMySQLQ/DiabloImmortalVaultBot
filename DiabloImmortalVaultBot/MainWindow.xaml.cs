@@ -1,4 +1,4 @@
-﻿namespace DiabloImmortalVaultBot;
+namespace DiabloImmortalVaultBot;
 
 public partial class MainWindow
 {
@@ -53,7 +53,7 @@ public partial class MainWindow
             {
                 //ignore
             }
-            Thread.Sleep(50);
+            Thread.Sleep(_appSettings.TimeBetweenChecksInMs);
         }
     }
 
