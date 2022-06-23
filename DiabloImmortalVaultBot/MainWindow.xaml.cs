@@ -1,8 +1,11 @@
-namespace DiabloImmortalVaultBot;
+﻿namespace DiabloImmortalVaultBot;
 
 public partial class MainWindow
 {
     private readonly AppSettings _appSettings;
+    private Task? _clickTask;
+    private CancellationTokenSource _cts = null!;
+    private CancellationToken _cancellationToken;
 
     #region user32.dll
     private const UInt32 MOUSEEVENTF_LEFTDOWN = 0x0002;
@@ -27,17 +30,22 @@ public partial class MainWindow
 
     private void BtnStartClick(object sender, RoutedEventArgs e)
     {
-        Task.Run(ClickBot);
+        _cts = new CancellationTokenSource();
+        _cancellationToken = _cts.Token;
+        _clickTask = Task.Run(() => ClickBot(_cancellationToken), _cancellationToken);
     }
 
-    private void ClickBot()
+    private void ClickBot(CancellationToken token)
     {
         SetCursorPos(_appSettings.XPos, _appSettings.YPos);
         while (true)
         {
+            if (token.IsCancellationRequested)
+                break;
+
             try
             {
-                if(_appSettings.ForcerCursorPosition)
+                if (_appSettings.ForcerCursorPosition)
                     SetCursorPos(_appSettings.XPos, _appSettings.YPos);
 
                 var pixelColor = GetPixelColor();
@@ -70,5 +78,18 @@ public partial class MainWindow
     {
         mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
         mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+    }
+
+    private void BtnStopClick(object sender, RoutedEventArgs e)
+    {
+        _cts.Cancel();
+
+        while (_cts.IsCancellationRequested && _clickTask?.Status == TaskStatus.Running)
+        {
+            Thread.Sleep(20);
+        }
+
+        _clickTask?.Dispose();
+        _cts.Dispose();
     }
 }

@@ -9,5 +9,6 @@
         SizeToContent="WidthAndHeight">
     <StackPanel>
         <Button Click="BtnStartClick" Content="Start"/>
+        <Button Click="BtnStopClick" Content="Stop"/>
     </StackPanel>
 </Window>
